@@ -3,13 +3,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Vector;
-import java.util.Date;
 
 public class Bet extends JFrame implements ActionListener{
 	
 	//game states 
 	private enum GameState {
-		BETTING, PLAYER_TURN, DEALER_TURN, GAME_OVER
+		BETTING, PLAYER_TURN, GAME_OVER
 	}
 	//declare the game state
 	private GameState gameState;
@@ -36,6 +35,7 @@ public class Bet extends JFrame implements ActionListener{
 	JLabel dealer;
 	JLabel youWin;
 	JLabel youLose;
+	JLabel busted;
 	JLabel dealerScore;
 	JLabel playerScore;
 	
@@ -58,7 +58,6 @@ public class Bet extends JFrame implements ActionListener{
 	JButton stand;
 	JButton surrender;
 	JButton playAgain;
-	JLabel busted;
 	
 	
 	//Function to Load the Game
@@ -361,11 +360,54 @@ public class Bet extends JFrame implements ActionListener{
 	   	revalidate();
 		repaint();
 	}
+	//RESET THE GAME WHEN PLAYER WANTS TO PLAY AGAIN
+	private void resetGame() {
+	    // Reset betting variables and labels
+	    betFunds = 0;
+	    count = 0;
+	    betAmountLabel.setText("Bet Amount: " + betFunds);
+	    fundsLabel.setText("Funds: " + playFunds);
+
+	    // Show betting elements again
+	    chip1.setVisible(true);
+	    chip5.setVisible(true);
+	    chip10.setVisible(true);
+	    chip20.setVisible(true);
+	    chip50.setVisible(true);
+	    chip100.setVisible(true);
+	    bet.setVisible(true);
+	    goBackToDash.setVisible(true);
+	    betAmountLabel.setVisible(true);
+	    fundsLabel.setVisible(true);
+
+	    // Reset game state
+	    gameState = GameState.BETTING;
+
+	    // Clear dealer and player decks
+	    container.removeAll();
+	    container.revalidate();
+	    container.repaint();
+
+	    // Show the game buttons again
+	    youWin.setVisible(false);
+	    youLose.setVisible(false);
+	    busted.setVisible(false);
+	    dealerScore.setVisible(false);
+	    playerScore.setVisible(false);
+	    hit.setVisible(false);
+	    stand.setVisible(false);
+	    surrender.setVisible(false);
+	    playAgain.setVisible(false);
+
+	    // Set the labels and buttons again
+	    setLabelButton();
+	    addComponentsToContainer();
+	}
 	
     //What happens when a user performs an action such as clicking a button
 	public void actionPerformed(ActionEvent e) {
 		
-		//GAME STATE : BETTING
+		//GAME STATE : BETTING ---------------------------------------------------------------
 		//If user clicks the goBackToDash/return button take them back to the main menu
 		if (e.getSource() == goBackToDash && gameState == GameState.BETTING) {
 			this.dispose();
@@ -515,7 +557,9 @@ public class Bet extends JFrame implements ActionListener{
 				betAmountLabel.setText("Bet Amount: " + betFunds);
 			}
 		}
-		//GAME STATE : PLAYER TURN
+		//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//GAME STATE : PLAYER TURN ---------------------------------------------------------------
+		//Player Hits
 		if (e.getSource() == hit && gameState == GameState.PLAYER_TURN) {
 			//add card to Player deck after hit and update the GUI
 			decks.addToPlayerDeck(decks.getCurrentCardFromGameDeck(count));
@@ -547,7 +591,10 @@ public class Bet extends JFrame implements ActionListener{
 			}
 			//CHECK FOR BLACKJACK
 			else if (decks.getPlayerScore() == 21) {
-				//Player has Blackjack
+				//give winnings to player
+				playFunds += betFunds*2;
+				//update labels
+				fundsLabel.setText("Funds: " + playFunds);
 				//change game state
 				gameState = GameState.GAME_OVER;
 				//hide the hit, stand, and surrender buttons
@@ -566,8 +613,95 @@ public class Bet extends JFrame implements ActionListener{
 				//show a return to main menu button
 				goBackToDash.setVisible(true);
 				//show a play again button
-				playAgain.setVisible(true);;
+				playAgain.setVisible(true);
 			}
+		}
+		//Player Stands
+		if (e.getSource() == stand && gameState == GameState.PLAYER_TURN) {
+			//Dealer hits until he has a score of 17 or more and at this point he stands
+			while (decks.getDealerScore() < 17) {
+				decks.addToDealerDeck(decks.getCurrentCardFromGameDeck(count));
+				count++;
+				updateDealerDeck(decks.getDealerDeck());
+			}
+			//Check for win condition: Dealer Busts or Player Score is greater than Dealer Score
+			if (decks.getDealerScore() > 21 || decks.getPlayerScore() > decks.getDealerScore()) {
+				//give winnings to player
+				playFunds += betFunds*2;
+				//update labels
+				fundsLabel.setText("Funds: " + playFunds);
+				//change game state
+				gameState = GameState.GAME_OVER;
+				//hide the hit, stand, and surrender buttons
+				hit.setVisible(false);
+				stand.setVisible(false);
+				surrender.setVisible(false);
+				//hide the dealer and you labels
+				dealer.setVisible(false);
+				you.setVisible(false);
+				//show your funds
+				fundsLabel.setVisible(true);
+				
+				//show a YOU WIN label
+				youWin.setVisible(true);
+				
+				//show a return to main menu button
+				goBackToDash.setVisible(true);
+				//show a play again button
+				playAgain.setVisible(true);
+			}
+			//Dealer wins via score
+			else {
+				//change game state
+				gameState = GameState.GAME_OVER;
+				//hide the hit, stand, and surrender buttons
+				hit.setVisible(false);
+				stand.setVisible(false);
+				surrender.setVisible(false);
+				//hide the dealer and you labels
+				dealer.setVisible(false);
+				you.setVisible(false);
+				//show your funds
+				fundsLabel.setVisible(true);
+				
+				//show a YOU WIN label
+				youLose.setVisible(true);
+				
+				//show a return to main menu button
+				goBackToDash.setVisible(true);
+				//show a play again button
+				playAgain.setVisible(true);
+				
+			}
+		
+		}
+		//Player Surrenders
+		if (e.getSource() == surrender && gameState == GameState.PLAYER_TURN) {
+			//change game state
+			gameState = GameState.GAME_OVER;
+			//hide the hit, stand, and surrender buttons
+			hit.setVisible(false);
+			stand.setVisible(false);
+			surrender.setVisible(false);
+			//hide the dealer and you labels
+			dealer.setVisible(false);
+			you.setVisible(false);
+			//show your funds
+			fundsLabel.setVisible(true);
+			
+			//show a YOU WIN label
+			youLose.setVisible(true);
+			
+			//show a return to main menu button
+			goBackToDash.setVisible(true);
+			//show a play again button
+			playAgain.setVisible(true);
+		}
+		//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+		//GAME STATE : GAME OVER ---------------------------------------------------------------
+		//Player Plays Again
+		if (e.getSource() == playAgain && gameState == GameState.GAME_OVER) {
+			resetGame();
 		}
 	}
 }
