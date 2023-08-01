@@ -267,17 +267,32 @@ public class Bet extends JFrame implements ActionListener{
     	bet.addActionListener(this);
     	goBackToDash.addActionListener(this);
     	playAgain.addActionListener(this);
-    	chip1.addActionListener(this);
-    	chip5.addActionListener(this);
-    	chip10.addActionListener(this);
-    	chip20.addActionListener(this);
-    	chip50.addActionListener(this);
-    	chip100.addActionListener(this);
+    	chip1.addActionListener(e -> handleChipButtonAction(1));
+    	chip5.addActionListener(e -> handleChipButtonAction(5));
+    	chip10.addActionListener(e -> handleChipButtonAction(10));
+    	chip20.addActionListener(e -> handleChipButtonAction(20));
+    	chip50.addActionListener(e -> handleChipButtonAction(50));
+    	chip100.addActionListener(e -> handleChipButtonAction(100));
     	hit.addActionListener(this);
     	stand.addActionListener(this);
     	surrender.addActionListener(this);
     }
  
+    //Handle the chip button actions
+    private void handleChipButtonAction(int chipValue) {
+        if (chipValue > playFunds) {
+            notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.\nReturn to the main menu and add funds to the bank");
+        } else {
+            // Update variables
+            betFunds += chipValue;
+            playFunds -= chipValue;
+
+            // Update labels
+            fundsLabel.setText("Funds: " + playFunds);
+            betAmountLabel.setText("Bet Amount: " + betFunds);
+        }
+    }
+
     //Initialize the decks when the game begins
 	public void initializeDecks() {
 		decks = new Decks();
@@ -298,7 +313,7 @@ public class Bet extends JFrame implements ActionListener{
 		updatePlayerDeck(decks.getPlayerDeck());
 	}
 	
-	//UPDATE THE DEALER DECK FOR THE GUI
+	//Update the Dealer Deck for the GUI
 	public void updateDealerDeck(Vector<Card>dDeck) {
     	
     	//declare an empty JLabel to add to the container
@@ -330,7 +345,7 @@ public class Bet extends JFrame implements ActionListener{
 		repaint();
     }
     
-	//UPDATE THE PLAYER DECK FOR THE GUI
+	//Update the Player Deck for the GUI
 	public void updatePlayerDeck(Vector<Card>pDeck) {
 	    	
 		//declare an empty JLabel to add to the container
@@ -360,7 +375,33 @@ public class Bet extends JFrame implements ActionListener{
 	   	revalidate();
 		repaint();
 	}
-	//RESET THE GAME WHEN PLAYER WANTS TO PLAY AGAIN
+	
+	//reupdate GUI stuff after the game ends
+	private void gameOver() {
+		//update labels
+		fundsLabel.setText("Funds: " + playFunds);
+		//change game state
+		gameState = GameState.GAME_OVER;
+		//hide the hit, stand, and surrender buttons
+		hit.setVisible(false);
+		stand.setVisible(false);
+		surrender.setVisible(false);
+		//hide the dealer and you labels
+		dealer.setVisible(false);
+		you.setVisible(false);
+		//show your funds
+		fundsLabel.setVisible(true);
+		
+		//show a YOU WIN label
+		youWin.setVisible(true);
+		
+		//show a return to main menu button
+		goBackToDash.setVisible(true);
+		//show a play again button
+		playAgain.setVisible(true);
+	}
+	//GUI stuff if player loses 
+	//Reset game after it ends 
 	private void resetGame() {
 	    // Reset betting variables and labels
 	    betFunds = 0;
@@ -404,7 +445,7 @@ public class Bet extends JFrame implements ActionListener{
 	    addComponentsToContainer();
 	}
 	
-    //What happens when a user performs an action such as clicking a button
+    //User actions
 	public void actionPerformed(ActionEvent e) {
 		
 		//GAME STATE : BETTING ---------------------------------------------------------------
@@ -450,113 +491,7 @@ public class Bet extends JFrame implements ActionListener{
 			gameState = GameState.PLAYER_TURN;
 			initializeDecks();
 		}
-		//If user clicks on chip 1
-		if (e.getSource() == chip1) {
-			//If user goes over their playFunds, show an error message
-			if (1 > playFunds) {
-				notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.");
-			}
-			//else update the variables and labels
-			else {
-				//update variables
-				betFunds += 1;
-				playFunds -= 1;
-				
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				betAmountLabel.setText("Bet Amount: " + betFunds);
-			}
-		}
-		//If user clicks on chip 5
-		if (e.getSource() == chip5) {
-			
-			//If user goes over their playFunds, show an error message
-			if (5 > playFunds) {
-				notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.\nReturn to main menu and add funds in the bank");
-			}
-			//else update the variables and labels
-			else {
-				//update variables
-				betFunds += 5;
-				playFunds -= 5;
-				
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				betAmountLabel.setText("Bet Amount: " + betFunds);
-			}
-		}
-		//If user clicks on chip 10
-		if (e.getSource() == chip10) {
-			
-			//If user goes over their playFunds, show an error message
-			if (10 > playFunds) {
-				notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.\nReturn to main menu and add funds in the bank");
-			}
-			//else update the variables and labels
-			else {
-				//update variables
-				betFunds += 10;
-				playFunds -= 10;
-				
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				betAmountLabel.setText("Bet Amount: " + betFunds);
-			}
-		}
-		//If user clicks on chip 20
-		if (e.getSource() == chip20) {
-			
-			//If user goes over their playFunds, show an error message
-			if (20 > playFunds) {
-				notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.\nReturn to main menu and add funds in the bank");
-			}
-			//else update the variables and labels
-			else {
-				//update variables
-				betFunds += 20;
-				playFunds -= 20;
-				
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				betAmountLabel.setText("Bet Amount: " + betFunds);
-			}
-		}
-		//If user clicks on chip 50
-		if (e.getSource() == chip50) {
-			
-			//If user goes over their playFunds, show an error message
-			if (50 > playFunds) {
-				notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.\nReturn to main menu and add funds in the bank");
-			}
-			//else update the variables and labels
-			else {
-				//update variables
-				betFunds += 50;
-				playFunds -= 50;
-				
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				betAmountLabel.setText("Bet Amount: " + betFunds);
-			}
-		}
-		//If user clicks on chip 100
-		if (e.getSource() == chip100) {
-			
-			//If user goes over their playFunds, show an error message
-			if (100 > playFunds) {
-				notEnoughFundsError.showMessageDialog(null, "Not Enough Funds to Bet.\nReturn to main menu and add funds in the bank");
-			}
-			//else update the variables and labels
-			else {
-				//update variables
-				betFunds += 100;
-				playFunds -= 100;
-				
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				betAmountLabel.setText("Bet Amount: " + betFunds);
-			}
-		}
+		
 		//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		//GAME STATE : PLAYER TURN ---------------------------------------------------------------
 		//Player Hits
@@ -568,52 +503,14 @@ public class Bet extends JFrame implements ActionListener{
 			
 			//CHECK FOR BUST
 			if(decks.getPlayerScore() > 21) {
-				//Player Busts
-				//change game state
-				gameState = GameState.GAME_OVER;
-				//hide the hit, stand, and surrender buttons
-				hit.setVisible(false);
-				stand.setVisible(false);
-				surrender.setVisible(false);
-				//hide the dealer and you labels
-				dealer.setVisible(false);
-				you.setVisible(false);
-				//show your funds
-				fundsLabel.setVisible(true);
-				
-				//show a YOU BUSTED label
-				busted.setVisible(true);
-				//show a return to main menu button
-				goBackToDash.setVisible(true);
-				//show a play again button
-				playAgain.setVisible(true);
+				gameOver();
 				
 			}
 			//CHECK FOR BLACKJACK
 			else if (decks.getPlayerScore() == 21) {
 				//give winnings to player
 				playFunds += betFunds*2;
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				//change game state
-				gameState = GameState.GAME_OVER;
-				//hide the hit, stand, and surrender buttons
-				hit.setVisible(false);
-				stand.setVisible(false);
-				surrender.setVisible(false);
-				//hide the dealer and you labels
-				dealer.setVisible(false);
-				you.setVisible(false);
-				//show your funds
-				fundsLabel.setVisible(true);
-				
-				//show a YOU WIN label
-				youWin.setVisible(true);
-				
-				//show a return to main menu button
-				goBackToDash.setVisible(true);
-				//show a play again button
-				playAgain.setVisible(true);
+				gameOver();
 			}
 		}
 		//Player Stands
@@ -628,74 +525,17 @@ public class Bet extends JFrame implements ActionListener{
 			if (decks.getDealerScore() > 21 || decks.getPlayerScore() > decks.getDealerScore()) {
 				//give winnings to player
 				playFunds += betFunds*2;
-				//update labels
-				fundsLabel.setText("Funds: " + playFunds);
-				//change game state
-				gameState = GameState.GAME_OVER;
-				//hide the hit, stand, and surrender buttons
-				hit.setVisible(false);
-				stand.setVisible(false);
-				surrender.setVisible(false);
-				//hide the dealer and you labels
-				dealer.setVisible(false);
-				you.setVisible(false);
-				//show your funds
-				fundsLabel.setVisible(true);
-				
-				//show a YOU WIN label
-				youWin.setVisible(true);
-				
-				//show a return to main menu button
-				goBackToDash.setVisible(true);
-				//show a play again button
-				playAgain.setVisible(true);
+				gameOver();
 			}
 			//Dealer wins via score
 			else {
-				//change game state
-				gameState = GameState.GAME_OVER;
-				//hide the hit, stand, and surrender buttons
-				hit.setVisible(false);
-				stand.setVisible(false);
-				surrender.setVisible(false);
-				//hide the dealer and you labels
-				dealer.setVisible(false);
-				you.setVisible(false);
-				//show your funds
-				fundsLabel.setVisible(true);
-				
-				//show a YOU WIN label
-				youLose.setVisible(true);
-				
-				//show a return to main menu button
-				goBackToDash.setVisible(true);
-				//show a play again button
-				playAgain.setVisible(true);
-				
+				gameOver();
 			}
 		
 		}
 		//Player Surrenders
 		if (e.getSource() == surrender && gameState == GameState.PLAYER_TURN) {
-			//change game state
-			gameState = GameState.GAME_OVER;
-			//hide the hit, stand, and surrender buttons
-			hit.setVisible(false);
-			stand.setVisible(false);
-			surrender.setVisible(false);
-			//hide the dealer and you labels
-			dealer.setVisible(false);
-			you.setVisible(false);
-			//show your funds
-			fundsLabel.setVisible(true);
-			
-			//show a YOU WIN label
-			youLose.setVisible(true);
-			
-			//show a return to main menu button
-			goBackToDash.setVisible(true);
-			//show a play again button
-			playAgain.setVisible(true);
+			gameOver();
 		}
 		//---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		//GAME STATE : GAME OVER ---------------------------------------------------------------
